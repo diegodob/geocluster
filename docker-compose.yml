@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+
+  geoserver-vectorial:
+    image: oscarfonts/geoserver:2.13.2
+    privileged: true
+    ports:
+      - "8080:8080"
+    volumes:
+      #- /srv/docker/geoserver/geoserver:/geoserver_data/data
+      #- /var/run/docker.sock:/var/run/docker.sock
+    #volumes_from:
+      - ./geoserver-exts:/var/local/geoserver-exts/
+      - "geoserver_data:/var/local/geoserver/data_dir"
+
+
+    environment:
+      - CATALINA_OPTS=$JAVA_OPTS -server -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xms2g -Xmx6g -XX:+UseG1GC -Dorg.geotools.shapefile.datetime=true -Duser.timezone=GMT-3
+      - http_proxy=http://172.20.203.111:3128/
+      - https_proxy=http://172.20.203.111:3128/
+
+volumes:
+  geoserver_data:
+    driver: local
+    driver_opts:
+      type: nfs
+      #o: addr=172.20.205.111,nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2
+      #o: addr=ISILON,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2
+      o: addr=ISILON,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2
+      device: "ISILON:/ifs/nfs/geoserver_lab_data"
