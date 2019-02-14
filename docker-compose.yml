@@ -1,4 +1,4 @@
-version: '3'
+version: '2'
 
 services:
 
@@ -8,24 +8,21 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      #- /srv/docker/geoserver/geoserver:/geoserver_data/data
-      #- /var/run/docker.sock:/var/run/docker.sock
-    #volumes_from:
       - ./geoserver-exts:/var/local/geoserver-exts/
-      - "geoserver_data:/var/local/geoserver/data_dir"
-
-
+      - "geoserver_init_volume:/var/local/ign/geoserver_init_data"
     environment:
       - CATALINA_OPTS=$JAVA_OPTS -server -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xms2g -Xmx6g -XX:+UseG1GC -Dorg.geotools.shapefile.datetime=true -Duser.timezone=GMT-3
       - http_proxy=http://172.20.203.111:3128/
       - https_proxy=http://172.20.203.111:3128/
+    command: >
+      sh -c "tar -xvf /var/local/ign/geoserver_init_data/geoserver_clone.tar.gz -C /var/local/geoserver &&
+      /usr/local/bin/start.sh"
+
 
 volumes:
-  geoserver_data:
+  geoserver_init_volume:
     driver: local
     driver_opts:
       type: nfs
-      #o: addr=172.20.205.111,nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2
-      #o: addr=ISILON,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2
-      o: addr=ISILON,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2
-      device: "ISILON:/ifs/nfs/geoserver_lab_data"
+      o: addr=172.20.205.111,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2
+      device: "172.20.205.111:/ifs/nfs/geoserver_docker_prueba"
